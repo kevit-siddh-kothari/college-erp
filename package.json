@@ -6,8 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon lib/app.js",
-    "lint": "npx eslint src/index.ts",
-    "lint:fix": "eslint 'src/**/*.{ts}' --fix",
+    "lint-check": "eslint .",
+    "lint-fix": "eslint --fix .",
+    "lint": "eslint --fix -c *.js,*.jsx .",
     "prepare": "husky",
     "format": "prettier --write \"src/**/*.ts\" ",
     "format:check": "prettier --check \"src/**/*.ts\" "
@@ -28,6 +29,7 @@
     "globals": "^15.9.0",
     "husky": "^8.0.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.1.0"
   }
 }
