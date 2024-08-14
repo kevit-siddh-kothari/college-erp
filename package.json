@@ -8,7 +8,9 @@
     "dev": "nodemon lib/app.js",
     "lint": "npx eslint src/index.ts",
     "lint:fix": "eslint 'src/**/*.{ts}' --fix",
-    "prepare": "husky i"
+    "prepare": "husky i",
+    "format": "prettier --write \"src/**/*.ts\" ",
+    "format:check": "prettier --check \"src/**/*.ts\" "
   },
   "keywords": [],
   "author": "",
