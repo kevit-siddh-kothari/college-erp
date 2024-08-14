@@ -6,8 +6,9 @@ dotenv.config();
 const connectionUrl:       string | undefined = process.env.MONGODB_URL;
 const port: string | undefined = process.env.PORT;
 
-connectionToDb(  connectionUrl);
+connectionToDb(      connectionUrl);
 
-const app =   express();
+const app   =   express();
 
-                     export { app, port }
+                       export { app, port }
+ 
