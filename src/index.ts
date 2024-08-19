@@ -1,30 +1,38 @@
 import dotenv from 'dotenv';
-import express from 'express';
+import express, { Application } from 'express';
 import { connectionToDb } from './db-connection/mongodb-connection';
-import {} from './components/student/routes/student';
-import {} from './components/user/routes/user.admin';
-import {} from './components/user/routes/user.staffmembers';
-import {} from './components/department/routes/department';
-import {} from './components/batch/routes/batch';
-import {} from './components/attendance/routes/attendance';
+import { studentRouter } from './components/student/routes/student';
+import { userRouter } from './components/user/routes/user';
+import { departmentRouter } from './components/department/routes/department';
+import { attendanceRouter } from './components/attendance/routes/attendance';
+
 dotenv.config();
 
-const connectionUrl: string | undefined = process.env.MONGODB_URL;
-const port: string | undefined = process.env.PORT;
+const connectionUrl: string = process.env.MONGODB_URL as string;
+const port: string = process.env.PORT || '3000';
 
-connectionToDb(connectionUrl)
+/**
+ * Connect to the MongoDB database using the provided connection URL.
+ *
+ * @param {string} connectionUrl - The connection string for the MongoDB database.
+ */
+connectionToDb(connectionUrl);
 
-const app = express()
-
+const app: Application = express();
 
 /*******************************
-        MIDDLEWEAR
+ * MIDDLEWARE - FOR PARSING USER DATA TO JSON
  *******************************/
-app.use('/api/staffmembers', );
-app.use('/api/admin');
-app.use('/api/students');
-app.use('/api/departments');
-app.use('/api/attendance');
-app.use('/api/batch');
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+/*******************************
+ * MIDDLEWARE - ROUTES
+ *******************************/
+app.use('/api/user', userRouter);
+app.use('/api/students', studentRouter);
+app.use('/api/departments', departmentRouter);
+app.use('/api/attendance', attendanceRouter);
+// app.use('/api/batch');
 
 export { app, port };

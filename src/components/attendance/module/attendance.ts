@@ -4,31 +4,43 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
  * Define an interface representing a document in MongoDB.
  * extends Document here inherit all properties and methods of mongodb like save(), _id, ....
  **/
-interface Attendance extends Document {
+interface IAttendance extends Document {
+  [key: string]: any;
   student: mongoose.Schema.Types.ObjectId;
+  department: mongoose.Schema.Types.ObjectId;
   date: Date;
-  attendance: 'present' | 'absent';
+  present: number;
+  absent: number;
 }
 
 // Create a schema corresponding to the document interface.
-const attendanceSchema: Schema<Attendance> = new mongoose.Schema({
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: 'students',
+const attendanceSchema: Schema<IAttendance> = new mongoose.Schema(
+  {
+    student: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'students',
+      unique: true,
+    },
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'departmnets',
+    },
+    present: {
+      type: Number,
+      default: 0,
+    },
+    absent: {
+      type: Number,
+      default: 0,
+    },
   },
-  date: {
-    type: Date,
-    required: true,
-  },
-  attendance: {
-    type: String,
-    enum: ['present', 'absent'],
-  },
-});
+  { timestamps: true },
+);
 
 // Create a model.
-const Attendance: Model<Attendance> = mongoose.model<Attendance>('attendance', attendanceSchema);
+const Attendance: Model<IAttendance> = mongoose.model<IAttendance>('attendance', attendanceSchema);
 
 // Export the model.
-export default Attendance;
+export { Attendance, IAttendance };
