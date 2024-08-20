@@ -5,6 +5,8 @@ import { studentRouter } from './components/student/routes/student';
 import { userRouter } from './components/user/routes/user';
 import { departmentRouter } from './components/department/routes/department';
 import { attendanceRouter } from './components/attendance/routes/attendance';
+import { batchRouter } from './components/batch/routes/batch';
+import bodyParser from 'body-parser';
 
 dotenv.config();
 
@@ -23,6 +25,7 @@ const app: Application = express();
 /*******************************
  * MIDDLEWARE - FOR PARSING USER DATA TO JSON
  *******************************/
+app.use(bodyParser.raw({ inflate: true, limit: '100kb', type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -33,6 +36,6 @@ app.use('/api/user', userRouter);
 app.use('/api/students', studentRouter);
 app.use('/api/departments', departmentRouter);
 app.use('/api/attendance', attendanceRouter);
-// app.use('/api/batch');
+app.use('/api/batch', batchRouter);
 
 export { app, port };

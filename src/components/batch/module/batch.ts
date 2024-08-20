@@ -7,6 +7,8 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
 interface IBranch {
   name: string;
   totalStudentsIntake: number;
+  availableSeats: number;
+  occupiedSeats: number;
 }
 
 /**
@@ -32,6 +34,14 @@ const branchSchema: Schema<IBranch> = new Schema({
     type: Number,
     required: true,
   },
+  availableSeats: {
+    type: Number,
+    required: true,
+  },
+  occupiedSeats: {
+    type: Number,
+    required: true,
+  },
 });
 
 /**
@@ -49,6 +59,6 @@ const batchSchema: Schema<IBatch> = new Schema({
  * Mongoose model for the batch collection.
  * @type {Model<IBatch>}
  */
-const Batch: Model<IBatch> = mongoose.model<IBatch>('Batch', batchSchema);
+const Batch: Model<IBatch> = mongoose.model<IBatch>('batches', batchSchema);
 
-export { Batch, IBatch, IBranch };
+export { Batch, IBatch };
