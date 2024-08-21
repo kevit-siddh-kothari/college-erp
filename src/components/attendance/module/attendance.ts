@@ -7,10 +7,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 interface IAttendance extends Document {
   [key: string]: any;
   student: mongoose.Schema.Types.ObjectId;
-  department: mongoose.Schema.Types.ObjectId;
-  date: Date;
-  present: number;
-  absent: number;
+  isPresent: Boolean;
 }
 
 // Create a schema corresponding to the document interface.
@@ -20,20 +17,10 @@ const attendanceSchema: Schema<IAttendance> = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'students',
-      unique: true,
     },
-    department: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: 'departmnets',
-    },
-    present: {
-      type: Number,
-      default: 0,
-    },
-    absent: {
-      type: Number,
-      default: 0,
+    isPresent: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true },

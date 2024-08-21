@@ -7,12 +7,13 @@ import {
   deleteAllDepartment,
 } from '../controller/department.controller';
 import { authentication } from '../../../middlewear/auth';
+import { authorizationAdmin } from '../../../middlewear/authorization';
 const departmentRouter = Router();
 
-departmentRouter.get('/all-department', authentication, getAllDepartment);
-departmentRouter.post('/add-department', authentication, addDepartment);
-departmentRouter.put('/update-department/:id', authentication, updateDepartmentById);
-departmentRouter.delete('/delete-department/:id', authentication, deleteDepartmentById);
-departmentRouter.delete('/deleteall-department', authentication, deleteAllDepartment);
+departmentRouter.get('/all-department', authentication, authorizationAdmin, getAllDepartment);
+departmentRouter.post('/add-department', authentication, authorizationAdmin, addDepartment);
+departmentRouter.put('/update-department/:id', authentication, authorizationAdmin, updateDepartmentById);
+departmentRouter.delete('/delete-department/:id', authentication, authorizationAdmin, deleteDepartmentById);
+departmentRouter.delete('/deleteall-department', authentication, authorizationAdmin, deleteAllDepartment);
 
 export { departmentRouter };

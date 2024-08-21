@@ -38,6 +38,22 @@ const addStudent = async (req: Request, res: Response): Promise<void> => {
     if (!departmenId) {
       throw new Error(`No department with name ${departmentname} exists`);
     }
+    console.log(departmenId);
+    //for checking the avaibaility of student entry in database
+    const batchData: IBatch = await Batch.find({ year: batch }, { branches: 1, _id: 0 }).lean();
+    if (batchData.length === 0) {
+      throw new Error(`no batch exist in the year ${batch}`);
+    }
+    batchData.forEach((item: any) => {
+      console.log(`hey1`);
+      item.branches.forEach((branch: any) => {
+        if (branch.departmentId._id.equals(departmenId._id)) {
+          if (branch.availableSeats <= 0) {
+            throw new Error(`no more entries`);
+          }
+        }
+      });
+    });
     const student: IStudent = new Student({
       name,
       phno,
@@ -45,26 +61,12 @@ const addStudent = async (req: Request, res: Response): Promise<void> => {
       batch,
       currentsem,
     });
-
-    //for checking the avaibaility of student entry in database
-    const batchData: any = await Batch.find({ year: batch }, { branches: 1, _id: 0 }).lean();
-    batchData.forEach((item: any) => {
-      item.branches.forEach((branch: any) => {
-        if (branch.name === departmentname) {
-          if (branch.availableSeats <= 0) {
-            throw new Error(`no more entries`);
-          }
-        }
-      });
-    });
-
     await student.save();
     await Batch.updateOne(
-      { 'year': batch, 'branches.name': departmentname },
+      { 'year': batch, 'branches.departmentId': departmenId._id },
       { $inc: { 'branches.$.availableSeats': -1, 'branches.$.occupiedSeats': 1 } },
     );
-    const data = new Attendance({ student: student._id, department: student.department });
-    await data.save();
+
     res.status(201).send(`student created sucessfully with default present attendance`);
   } catch (error: any) {
     res.status(400).send(error.message);
@@ -153,7 +155,10 @@ const getAbsentStudents = async (req: Request, res: Response): Promise<void> => 
   try {
     const { date } = req.params;
     const { batch, branch, currentsem } = req.query;
-
+    const startDay = new Date(date);
+    startDay.setUTCHours(0, 0, 0, 0);
+    const endDay = new Date(date);
+    endDay.setUTCHours(23, 59, 59, 999);
     // Ensure that the date parameter is provided
     if (!date) {
       res.status(400).json({ error: 'Date parameter is required.' });
@@ -174,7 +179,10 @@ const getAbsentStudents = async (req: Request, res: Response): Promise<void> => 
     }
 
     // Fetch attendance records for the specific date
-    const attendanceRecords = await Attendance.find({ createdAt: date }, { student: 1, _id: 0, present: 1, absent: 1 })
+    const attendanceRecords = await Attendance.find(
+      { createdAt: { $gte: startDay, $lte: endDay } },
+      { student: 1, _id: 0, isPresent: 1 },
+    )
       .populate('student', 'batch currentsem department')
       .lean();
 
@@ -197,11 +205,6 @@ const getAbsentStudents = async (req: Request, res: Response): Promise<void> => 
       res.status(404).json({ error: 'No matching students found based on the provided criteria.' });
       return;
     }
-    for (let a of filteredStudents) {
-      if (((a.present + a.absent) / 30) * 100 < 75) {
-        a.message = 'Student current month atendace is less than 75';
-      }
-    }
     // Send the filtered list of absent students as response
     res.status(200).json(filteredStudents);
   } catch (error: any) {
@@ -209,6 +212,26 @@ const getAbsentStudents = async (req: Request, res: Response): Promise<void> => 
     console.error('Error fetching absent students:', error);
     res.status(500).json({ error: 'Internal Server Error. Please try again later.' });
   }
+};
+
+const presentLessThan75 = async (req: Request, res: Response): Promise<void> => {
+  const attendance = await Attendance.aggregate([
+    {
+      $group: {
+        _id: '$student',
+        TotalPresent: {
+          $sum: { $cond: { if: { $eq: ['$isPresent', true] }, then: 1, else: 0 } },
+        },
+      },
+    },
+  ]);
+  const data: {}[] = [];
+  const filteredStudents = attendance.forEach(student => {
+    if (student.TotalPresent < 23) {
+      data.push(student);
+    }
+  });
+  res.send(data);
 };
 
 const getAnalyticsData = async (req: Request, res: Response) => {
@@ -283,12 +306,51 @@ const getAnalyticsData = async (req: Request, res: Response) => {
   res.send(analyticsData);
 };
 
-const getVacantSeats = async (req: Request, res: Response): Promise<void> => {};
+const getVacantSeats = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { batch, branch } = req.query;
+    const departmentId: any = await Department.findOne({departmentname: branch},{_id:1});
+
+    let arr: {}[] = [];
+    let query:any={};
+    if(batch){
+      query.year = Number(batch);
+    }
+    if(branch && departmentId){
+      query['branches'] = {$elemMatch:{departmentId: departmentId._id}}
+    }
+    console.log(query)
+    const batchData = await Batch.find(query).lean();
+    if(!batchData.length){
+      throw new Error(`no output for specified year ${batch}`);
+    }
+    for (let batch = 0; batch < batchData.length; batch++) {
+      let batchobj: any = {};
+      batchobj.year = batchData[batch].year;
+      batchobj.totalStudents = await Student.find().countDocuments();
+      let intake: number = 0;
+      let avaibaility: number = 0;
+      for (let a of batchData[batch].branches) {
+        intake += a.totalStudentsIntake;
+        avaibaility += a.availableSeats;
+      }
+      batchobj.totalStudentsIntake = intake;
+      batchobj.availableIntake = avaibaility;
+      batchobj.branches = batchData[batch].branches;
+      arr.push(batchobj);
+    }
+   
+    res.send(arr);
+  } catch (error: any) {
+    res.send(error.message);
+  }
+};
 
 // Export the functions
 export {
   addStudent,
   updateStudentById,
+  presentLessThan75,
   deleteStudentById,
   deleteAllStudents,
   getAllStudent,

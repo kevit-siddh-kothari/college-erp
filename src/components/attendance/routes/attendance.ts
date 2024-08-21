@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { updateAttendance, getAllStudentAttendance } from '../controller/attendance.controller';
+import { updateAttendance, getAllStudentAttendance, addAttendance } from '../controller/attendance.controller';
 import { authentication } from '../../../middlewear/auth';
 const attendanceRouter = Router();
 
 attendanceRouter.get('/all-attendance', authentication, getAllStudentAttendance);
-attendanceRouter.post('/update-attendance/:id', authentication, updateAttendance);
+attendanceRouter.post('/add-attendance/:id', authentication, addAttendance);
+attendanceRouter.put('/update-attendance/:id/:date', authentication, updateAttendance);
 
 export { attendanceRouter };
