@@ -10,13 +10,16 @@ interface IDepartment extends Document {
 }
 
 // Create a schema corresponding to the document interface.
-const departmentSchema: Schema<IDepartment> = new mongoose.Schema({
-  departmentname: {
-    type: String,
-    required: true,
-    unique: true,
+const departmentSchema: Schema<IDepartment> = new mongoose.Schema(
+  {
+    departmentname: {
+      type: String,
+      required: true,
+      unique: true,
+    },
   },
-});
+  { timestamps: true },
+);
 
 // Create a model.
 const Department: Model<IDepartment> = mongoose.model<IDepartment>('departments', departmentSchema);

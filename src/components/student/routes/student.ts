@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   addStudent,
   updateStudentById,
+  presentLessThan75,
   deleteAllStudents,
   deleteStudentById,
   getAllStudent,
@@ -15,7 +16,8 @@ const studentRouter = Router();
 studentRouter.get('/all-students', authentication, getAllStudent);
 studentRouter.get('/getanalytics', authentication, getAnalyticsData);
 studentRouter.get('/vacantseats', getVacantSeats);
-studentRouter.get('/:date', authentication, getAbsentStudents);
+studentRouter.get('/presentlessthan75', presentLessThan75);
+studentRouter.get('/absent/:date', authentication, getAbsentStudents);
 studentRouter.post('/add-student', addStudent);
 studentRouter.put('/update-student/:id', authentication, updateStudentById);
 studentRouter.delete('/delete-student/:id', authentication, deleteStudentById);

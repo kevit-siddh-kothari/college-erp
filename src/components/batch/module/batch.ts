@@ -5,7 +5,7 @@ import mongoose, { Document, Schema, Model } from 'mongoose';
  * @interface
  */
 interface IBranch {
-  name: string;
+  departmentId: mongoose.Schema.Types.ObjectId;
   totalStudentsIntake: number;
   availableSeats: number;
   occupiedSeats: number;
@@ -26,8 +26,8 @@ interface IBatch extends Document {
  * Mongoose schema for the branch subdocument.
  */
 const branchSchema: Schema<IBranch> = new Schema({
-  name: {
-    type: String,
+  departmentId: {
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
   totalStudentsIntake: {

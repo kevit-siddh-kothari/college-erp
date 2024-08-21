@@ -9,11 +9,23 @@ const getAllStudentAttendance = async (req: Request, res: Response): Promise<voi
     res.status(400).send(error.message);
   }
 };
-const updateAttendance = async (req: Request, res: Response): Promise<void> => {
+
+const addAttendance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    console.log(id);
-    const data: IAttendance | null = await Attendance.findOne({ student: id }, { present: 1, absent: 1 });
+    const { isPresent } = req.body;
+    const attendance = new Attendance({ student: id, isPresent });
+    await attendance.save();
+    res.send(`Attendance created sucessfully`);
+  } catch (error: any) {
+    res.send(error.message);
+  }
+};
+
+const updateAttendance = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id, date } = req.params;
+    const data: IAttendance | null = await Attendance.findOne({ student: id, createdAt: date });
     if (!data) {
       throw new Error(`No students exist on given ${id}`);
     }
@@ -28,4 +40,4 @@ const updateAttendance = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { updateAttendance, getAllStudentAttendance };
+export { updateAttendance, getAllStudentAttendance, addAttendance };
