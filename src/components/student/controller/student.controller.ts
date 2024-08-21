@@ -215,23 +215,54 @@ const getAbsentStudents = async (req: Request, res: Response): Promise<void> => 
 };
 
 const presentLessThan75 = async (req: Request, res: Response): Promise<void> => {
+  const {branch, batch, currentsem} = req.query;
   const attendance = await Attendance.aggregate([
-    {
-      $group: {
-        _id: '$student',
-        TotalPresent: {
-          $sum: { $cond: { if: { $eq: ['$isPresent', true] }, then: 1, else: 0 } },
-        },
+   // Stage 1: Lookup to populate student details
+  {
+    $lookup: {
+      from: 'students', // The collection to join with
+      localField: 'student', // The field from the input documents
+      foreignField: '_id', // The field from the student collection
+      as: 'studentInfo', // Name of the new array field to add
+    },
+  },
+  // Stage 2: Unwind the studentInfo array to get student details in each document
+  {
+    $unwind: '$studentInfo',
+  },
+  // Stage 3: Group by student and calculate total presence
+  {
+    $group: {
+      _id: '$studentInfo', // Group by studentInfo after population
+      TotalPresent: {
+        $sum: { $cond: { if: { $eq: ['$isPresent', true] }, then: 1, else: 0 } },
       },
     },
+  }
   ]);
+
+  let branchId: unknown;
+  if (branch) {
+    const department = await Department.findOne({ departmentname: branch }, { _id: 1 }).lean();
+    if (!department) {
+      res.status(404).json({ error: `Branch '${branch}' not found.` });
+      return;
+    }
+    branchId = department._id;
+  }
+
   const data: {}[] = [];
-  const filteredStudents = attendance.forEach(student => {
-    if (student.TotalPresent < 23) {
-      data.push(student);
+  const filteredStudents = attendance.filter(record => {
+    if (record.TotalPresent < 23) {
+      const student = record._id;
+
+      const matchBatch = batch ? student.batch === Number(batch) : true;
+      const matchBranch = branch ? String(student.department) === String(branchId) : true;
+      const matchCurrentsem = currentsem ? student.currentsem === Number(currentsem) : true;
+      return matchBatch && matchBranch && matchCurrentsem;
     }
   });
-  res.send(data);
+  res.send(filteredStudents);
 };
 
 const getAnalyticsData = async (req: Request, res: Response) => {
