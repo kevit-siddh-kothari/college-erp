@@ -1,4 +1,4 @@
-import { Attendance, IAttendance } from '../module/attendance';
+import { Attendance, IAttendance } from '../module/attendance.module';
 import { Request, Response } from 'express';
 
 const getAllStudentAttendance = async (req: Request, res: Response): Promise<void> => {

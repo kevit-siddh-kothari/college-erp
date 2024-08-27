@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { User, IUser } from '../module/user';
+import { User, IUser } from '../module/user.module';
 import bcrypt from 'bcrypt';
 import * as jwt from '../services/jwt.token';
+import { Result, validationResult } from 'express-validator';
 
 // Extending the Request interface to include user and token properties for authenticated requests
 interface AuthenticatedRequest extends Request {
@@ -19,15 +20,14 @@ interface AuthenticatedRequest extends Request {
  */
 const signUp = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password, role }: { username: string; password: string; role: string } = req.body;
-
-    // Validate required fields
-    if (!username || !password || !role) {
-      throw new Error('All fields (username, password, role) are required');
+    // const { username, password, role }: { username: string; password: string; role: string } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // Throw an error with the validation errors
+      throw new Error(JSON.stringify({ errors: errors.array() }));
     }
-
     // Create a new user and save to the database
-    const user = new User({ username, password, role });
+    const user = new User({ username: req.body.username, password: req.body.password, role: req.body.role });
     await user.save();
 
     res.status(201).send('User created successfully');
@@ -47,16 +47,19 @@ const signUp = async (req: Request, res: Response): Promise<void> => {
  */
 const logIn = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password }: { username: string; password: string } = req.body;
-
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // Throw an error with the validation errors
+      throw new Error(JSON.stringify({ errors: errors.array() }));
+    }
     // Find user by username
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: req.body.username });
     if (!user) {
       throw new Error('Username is invalid');
     }
 
     // Compare password with hashed password in database
-    const match = bcrypt.compareSync(password, user.password);
+    const match = bcrypt.compareSync(req.body.password, user.password);
     if (match) {
       // Generate JWT token
       const token = await jwt.generateToken(user);

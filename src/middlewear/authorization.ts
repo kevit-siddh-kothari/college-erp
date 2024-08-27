@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { IUser, User } from '../components/user/module/user';
+import { IUser, User } from '../components/user/module/user.module';
 import { Console } from 'console';
 interface AuthenticatedRequest extends Request {
   user?: IUser;

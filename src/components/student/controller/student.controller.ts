@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
-import { Student, IStudent } from '../module/student';
-import { Department } from '../../department/module/department';
-import { Attendance } from '../../attendance/module/attendance';
-import { Batch, IBatch } from '../../batch/module/batch';
+import { Student, IStudent } from '../module/student.module';
+import { Department } from '../../department/module/department.module';
+import { Attendance } from '../../attendance/module/attendance.module';
+import { Batch, IBatch } from '../../batch/module/batch.module';
 import { error } from 'console';
+import { Result, validationResult } from 'express-validator';
 
 /**
  * Handles getting all student.
@@ -33,16 +34,23 @@ const getAllStudent = async (req: Request, res: Response): Promise<void> => {
  */
 const addStudent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, phno, departmentname, batch, currentsem } = req.body;
-    const departmenId = await Department.findOne({ departmentname }, { _id: 1 });
+    // const { name, phno, departmentname, batch, currentsem } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // Throw an error with the validation errors
+      throw new Error(JSON.stringify({ errors: errors.array() }));
+    }
+
+    const departmenId = await Department.findOne({ departmentname: req.body.departmentname }, { _id: 1 });
     if (!departmenId) {
-      throw new Error(`No department with name ${departmentname} exists`);
+      throw new Error(`No department with name ${req.body.departmentname} exists`);
     }
     console.log(departmenId);
     //for checking the avaibaility of student entry in database
-    const batchData: IBatch = await Batch.find({ year: batch }, { branches: 1, _id: 0 }).lean();
+    const batchData: IBatch = await Batch.find({ year: req.body.batch }, { branches: 1, _id: 0 }).lean();
     if (batchData.length === 0) {
-      throw new Error(`no batch exist in the year ${batch}`);
+      throw new Error(`no batch exist in the year ${req.body.batch}`);
     }
     batchData.forEach((item: any) => {
       console.log(`hey1`);
@@ -55,15 +63,15 @@ const addStudent = async (req: Request, res: Response): Promise<void> => {
       });
     });
     const student: IStudent = new Student({
-      name,
-      phno,
+      name: req.body.name,
+      phno: req.body.phno,
       department: departmenId,
-      batch,
-      currentsem,
+      batch: req.body.batch,
+      currentsem: req.body.currentsem,
     });
     await student.save();
     await Batch.updateOne(
-      { 'year': batch, 'branches.departmentId': departmenId._id },
+      { 'year': req.body.batch, 'branches.departmentId': departmenId._id },
       { $inc: { 'branches.$.availableSeats': -1, 'branches.$.occupiedSeats': 1 } },
     );
 
@@ -215,23 +223,54 @@ const getAbsentStudents = async (req: Request, res: Response): Promise<void> => 
 };
 
 const presentLessThan75 = async (req: Request, res: Response): Promise<void> => {
+  const {branch, batch, currentsem} = req.query;
   const attendance = await Attendance.aggregate([
-    {
-      $group: {
-        _id: '$student',
-        TotalPresent: {
-          $sum: { $cond: { if: { $eq: ['$isPresent', true] }, then: 1, else: 0 } },
-        },
+   // Stage 1: Lookup to populate student details
+  {
+    $lookup: {
+      from: 'students', // The collection to join with
+      localField: 'student', // The field from the input documents
+      foreignField: '_id', // The field from the student collection
+      as: 'studentInfo', // Name of the new array field to add
+    },
+  },
+  // Stage 2: Unwind the studentInfo array to get student details in each document
+  {
+    $unwind: '$studentInfo',
+  },
+  // Stage 3: Group by student and calculate total presence
+  {
+    $group: {
+      _id: '$studentInfo', // Group by studentInfo after population
+      TotalPresent: {
+        $sum: { $cond: { if: { $eq: ['$isPresent', true] }, then: 1, else: 0 } },
       },
     },
+  }
   ]);
+
+  let branchId: unknown;
+  if (branch) {
+    const department = await Department.findOne({ departmentname: branch }, { _id: 1 }).lean();
+    if (!department) {
+      res.status(404).json({ error: `Branch '${branch}' not found.` });
+      return;
+    }
+    branchId = department._id;
+  }
+
   const data: {}[] = [];
-  const filteredStudents = attendance.forEach(student => {
-    if (student.TotalPresent < 23) {
-      data.push(student);
+  const filteredStudents = attendance.filter(record => {
+    if (record.TotalPresent < 23) {
+      const student = record._id;
+
+      const matchBatch = batch ? student.batch === Number(batch) : true;
+      const matchBranch = branch ? String(student.department) === String(branchId) : true;
+      const matchCurrentsem = currentsem ? student.currentsem === Number(currentsem) : true;
+      return matchBatch && matchBranch && matchCurrentsem;
     }
   });
-  res.send(data);
+  res.send(filteredStudents);
 };
 
 const getAnalyticsData = async (req: Request, res: Response) => {
