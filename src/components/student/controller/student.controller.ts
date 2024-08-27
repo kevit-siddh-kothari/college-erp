@@ -4,6 +4,7 @@ import { Department } from '../../department/module/department';
 import { Attendance } from '../../attendance/module/attendance';
 import { Batch, IBatch } from '../../batch/module/batch';
 import { error } from 'console';
+import { Result, validationResult } from 'express-validator';
 
 /**
  * Handles getting all student.
@@ -33,16 +34,23 @@ const getAllStudent = async (req: Request, res: Response): Promise<void> => {
  */
 const addStudent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, phno, departmentname, batch, currentsem } = req.body;
-    const departmenId = await Department.findOne({ departmentname }, { _id: 1 });
+    // const { name, phno, departmentname, batch, currentsem } = req.body;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // Throw an error with the validation errors
+      throw new Error(JSON.stringify({ errors: errors.array() }));
+    }
+
+    const departmenId = await Department.findOne({ departmentname: req.body.departmentname }, { _id: 1 });
     if (!departmenId) {
-      throw new Error(`No department with name ${departmentname} exists`);
+      throw new Error(`No department with name ${req.body.departmentname} exists`);
     }
     console.log(departmenId);
     //for checking the avaibaility of student entry in database
-    const batchData: IBatch = await Batch.find({ year: batch }, { branches: 1, _id: 0 }).lean();
+    const batchData: IBatch = await Batch.find({ year: req.body.batch }, { branches: 1, _id: 0 }).lean();
     if (batchData.length === 0) {
-      throw new Error(`no batch exist in the year ${batch}`);
+      throw new Error(`no batch exist in the year ${req.body.batch}`);
     }
     batchData.forEach((item: any) => {
       console.log(`hey1`);
@@ -55,15 +63,15 @@ const addStudent = async (req: Request, res: Response): Promise<void> => {
       });
     });
     const student: IStudent = new Student({
-      name,
-      phno,
+      name: req.body.name,
+      phno: req.body.phno,
       department: departmenId,
-      batch,
-      currentsem,
+      batch: req.body.batch,
+      currentsem: req.body.currentsem,
     });
     await student.save();
     await Batch.updateOne(
-      { 'year': batch, 'branches.departmentId': departmenId._id },
+      { 'year': req.body.batch, 'branches.departmentId': departmenId._id },
       { $inc: { 'branches.$.availableSeats': -1, 'branches.$.occupiedSeats': 1 } },
     );
 
