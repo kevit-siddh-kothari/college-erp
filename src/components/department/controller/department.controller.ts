@@ -1,8 +1,8 @@
-import { Department, IDepartment } from '../module/department';
-import { Student } from '../../student/module/student';
+import { Department, IDepartment } from '../module/department.module';
+import { Student } from '../../student/module/student.module';
 import { Request, Response } from 'express';
-import { Attendance } from '../../attendance/module/attendance';
-import { IUser } from '../../user/module/user';
+import { Attendance } from '../../attendance/module/attendance.module';
+import { IUser } from '../../user/module/user.module';
 import { validationResult } from 'express-validator';
 
 /**

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { Student, IStudent } from '../module/student';
-import { Department } from '../../department/module/department';
-import { Attendance } from '../../attendance/module/attendance';
-import { Batch, IBatch } from '../../batch/module/batch';
+import { Student, IStudent } from '../module/student.module';
+import { Department } from '../../department/module/department.module';
+import { Attendance } from '../../attendance/module/attendance.module';
+import { Batch, IBatch } from '../../batch/module/batch.module';
 import { error } from 'console';
 import { Result, validationResult } from 'express-validator';
 

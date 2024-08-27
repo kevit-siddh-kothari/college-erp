@@ -1,4 +1,4 @@
-import { User, IUser } from '../module/user'; // Assuming IUser is the interface for User
+import { User, IUser } from '../module/user.module'; // Assuming IUser is the interface for User
 import * as jwt from 'jsonwebtoken';
 
 /**

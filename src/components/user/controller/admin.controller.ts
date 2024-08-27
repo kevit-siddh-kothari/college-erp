@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { User, IUser } from '../module/user';
+import { User, IUser } from '../module/user.module';
 import bcrypt from 'bcrypt';
 import * as jwt from '../services/jwt.token';
 import { Result, validationResult } from 'express-validator';

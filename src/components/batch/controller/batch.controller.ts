@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { Batch, IBatch } from '../module/batch';
-import { Department, IDepartment } from '../../department/module/department';
+import { Batch, IBatch } from '../module/batch.module';
+import { Department, IDepartment } from '../../department/module/department.module';
 
 const getBatch = async (req: Request, res: Response): Promise<void> => {
   try {
