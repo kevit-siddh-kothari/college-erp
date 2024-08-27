@@ -1,6 +1,6 @@
+import { Request, Response } from 'express';
 import { Department, IDepartment } from '../module/department.module';
 import { Student } from '../../student/module/student.module';
-import { Request, Response } from 'express';
 import { Attendance } from '../../attendance/module/attendance.module';
 import { IUser } from '../../user/module/user.module';
 import { validationResult } from 'express-validator';
@@ -14,118 +14,128 @@ interface AuthenticatedRequest extends Request {
 }
 
 /**
- * Retrieves all departments from the database.
- * Only accessible by an admin user.
- *
- * @param {AuthenticatedRequest & Request} req - The request object.
- * @param {Response} res - The response object.
- * @returns {Promise<void>} A promise that resolves with no value.
+ * Controller class for handling department-related operations.
  */
-const getAllDepartment = async (req: AuthenticatedRequest & Request, res: Response): Promise<void> => {
-  try {
-    if (req.user?.role !== 'admin') {
-      throw new Error('You are authenticated but not authorized for department controls!');
-    }
-    const departments: IDepartment[] = await Department.find({});
-    res.status(200).send(departments);
-  } catch (error: any) {
-    res.status(400).send(error.message);
-  }
-};
-
-/**
- * Adds a new department to the database.
- * Only accessible by an admin user.
- *
- * @param {AuthenticatedRequest & Request} req - The request object.
- * @param {Response} res - The response object.
- * @returns {Promise<void>} A promise that resolves with no value.
- */
-const addDepartment = async (req: AuthenticatedRequest & Request, res: Response): Promise<void> => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      // Throw an error with the validation errors
-      throw new Error(JSON.stringify({ errors: errors.array() }));
-    }
-    const department = new Department({ departmentname: req.body.departmentname });
-    await department.save();
-    res.send('Department created successfully');
-  } catch (error: any) {
-    res.status(400).send(error.message);
-  }
-};
-
-/**
- * Updates an existing department by ID.
- * Only accessible by an admin user.
- *
- * @param {AuthenticatedRequest & Request} req - The request object.
- * @param {Response} res - The response object.
- * @returns {Promise<void>} A promise that resolves with no value.
- */
-const updateDepartmentById = async (req: AuthenticatedRequest & Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const department: IDepartment | null = await Department.findById(id);
-    if (!department) {
-      throw new Error(`No department with ID ${id} exists in the database`);
-    }
-    const body: Partial<IDepartment> = req.body;
-    for (const key in body) {
-      if (body.hasOwnProperty(key)) {
-        department[key] = body[key];
+class DepartmentController {
+  /**
+   * Retrieves all departments from the database.
+   * Only accessible by an admin user.
+   *
+   * @param {AuthenticatedRequest & Request} req - The request object, which includes the user information.
+   * @param {Response} res - The response object.
+   * @returns {Promise<void>} A promise that resolves with no value.
+   * @throws {Error} Throws an error if the user is not authorized or if there's an issue retrieving data.
+   */
+  public async getAllDepartment(req: AuthenticatedRequest & Request, res: Response): Promise<void> {
+    try {
+      if (req.user?.role !== 'admin') {
+        throw new Error('You are authenticated but not authorized for department controls!');
       }
+      const departments: IDepartment[] = await Department.find({});
+      res.status(200).send(departments);
+    } catch (error: any) {
+      res.status(400).send(error.message);
     }
-    await department.save();
-    res.send('Department updated successfully');
-  } catch (error: any) {
-    res.status(400).send(error.message);
   }
-};
 
-/**
- * Deletes an existing department by ID.
- * Also deletes associated students and attendance records.
- * Only accessible by an admin user.
- *
- * @param {AuthenticatedRequest & Request} req - The request object.
- * @param {Response} res - The response object.
- * @returns {Promise<void>} A promise that resolves with no value.
- */
-const deleteDepartmentById = async (req: AuthenticatedRequest & Request, res: Response): Promise<void> => {
-  try {
-    const { id } = req.params;
-    const department: IDepartment | null = await Department.findById(id);
-    if (!department) {
-      throw new Error(`No department with ID ${id} exists in the database`);
+  /**
+   * Adds a new department to the database.
+   * Only accessible by an admin user.
+   *
+   * @param {AuthenticatedRequest & Request} req - The request object, which includes the department details.
+   * @param {Response} res - The response object.
+   * @returns {Promise<void>} A promise that resolves with no value.
+   * @throws {Error} Throws an error if there are validation issues or if there's an issue saving the department.
+   */
+  public async addDepartment(req: AuthenticatedRequest & Request, res: Response): Promise<void> {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        throw new Error(JSON.stringify({ errors: errors.array() }));
+      }
+      const department = new Department({ departmentname: req.body.departmentname });
+      await department.save();
+      res.send('Department created successfully');
+    } catch (error: any) {
+      res.status(400).send(error.message);
     }
-    await Attendance.deleteMany({ department: id });
-    await Student.deleteMany({ department: id });
-    await Department.deleteOne({ _id: id });
-    res.send(`Department with ID ${id} deleted successfully along with associated students and attendance records.`);
-  } catch (error: any) {
-    res.status(400).send(error.message);
   }
-};
 
-/**
- * Deletes all departments, students, and attendance records from the database.
- * Only accessible by an admin user.
- *
- * @param {AuthenticatedRequest & Request} req - The request object.
- * @param {Response} res - The response object.
- * @returns {Promise<void>} A promise that resolves with no value.
- */
-const deleteAllDepartment = async (req: AuthenticatedRequest & Request, res: Response): Promise<void> => {
-  try {
-    await Attendance.deleteMany({});
-    await Department.deleteMany({});
-    await Student.deleteMany({});
-    res.status(200).send('All departments, students, and attendance records deleted successfully');
-  } catch (error: any) {
-    res.status(400).send(error.message);
+  /**
+   * Updates an existing department by ID.
+   * Only accessible by an admin user.
+   *
+   * @param {AuthenticatedRequest & Request} req - The request object, which includes the department ID and updated details.
+   * @param {Response} res - The response object.
+   * @returns {Promise<void>} A promise that resolves with no value.
+   * @throws {Error} Throws an error if the department is not found or if there's an issue updating the department.
+   */
+  public async updateDepartmentById(req: AuthenticatedRequest & Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const department: IDepartment | null = await Department.findById(id);
+      if (!department) {
+        throw new Error(`No department with ID ${id} exists in the database`);
+      }
+      const body: Partial<IDepartment> = req.body;
+      for (const key in body) {
+        if (body.hasOwnProperty(key)) {
+          department[key] = body[key];
+        }
+      }
+      await department.save();
+      res.send('Department updated successfully');
+    } catch (error: any) {
+      res.status(400).send(error.message);
+    }
   }
-};
 
-export { getAllDepartment, addDepartment, updateDepartmentById, deleteDepartmentById, deleteAllDepartment };
+  /**
+   * Deletes an existing department by ID.
+   * Also deletes associated students and attendance records.
+   * Only accessible by an admin user.
+   *
+   * @param {AuthenticatedRequest & Request} req - The request object, which includes the department ID.
+   * @param {Response} res - The response object.
+   * @returns {Promise<void>} A promise that resolves with no value.
+   * @throws {Error} Throws an error if the department is not found or if there's an issue deleting related records.
+   */
+  public async deleteDepartmentById(req: AuthenticatedRequest & Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const department: IDepartment | null = await Department.findById(id);
+      if (!department) {
+        throw new Error(`No department with ID ${id} exists in the database`);
+      }
+      await Attendance.deleteMany({ department: id });
+      await Student.deleteMany({ department: id });
+      await Department.deleteOne({ _id: id });
+      res.send(`Department with ID ${id} deleted successfully along with associated students and attendance records.`);
+    } catch (error: any) {
+      res.status(400).send(error.message);
+    }
+  }
+
+  /**
+   * Deletes all departments, students, and attendance records from the database.
+   * Only accessible by an admin user.
+   *
+   * @param {AuthenticatedRequest & Request} req - The request object.
+   * @param {Response} res - The response object.
+   * @returns {Promise<void>} A promise that resolves with no value.
+   * @throws {Error} Throws an error if there's an issue deleting the records.
+   */
+  public async deleteAllDepartment(req: AuthenticatedRequest & Request, res: Response): Promise<void> {
+    try {
+      await Attendance.deleteMany({});
+      await Department.deleteMany({});
+      await Student.deleteMany({});
+      res.status(200).send('All departments, students, and attendance records deleted successfully');
+    } catch (error: any) {
+      res.status(400).send(error.message);
+    }
+  }
+}
+
+// Export the controller as an instance
+export const departmentController = new DepartmentController();

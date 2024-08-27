@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authentication } from '../../../middlewear/auth'; // Fixed path to 'middleware'
-import { signUp, logIn, logOut, logOutFromAllDevices } from '../controller/admin.controller';
+import { userController } from '../controller/user.controller';
 import * as validator from 'express-validator';
 
 // Create a new Router instance
@@ -11,7 +11,7 @@ userRouter.post(
   '/login',
   validator.body('username').notEmpty().withMessage(`username is required !`),
   validator.body('password').notEmpty().withMessage(`password is required !`),
-  logIn,
+  userController.logIn,
 );
 
 userRouter.post(
@@ -22,12 +22,12 @@ userRouter.post(
     .body('role')
     .custom(a => a === 'admin' || 'staffmember')
     .notEmpty(),
-  signUp,
+  userController.signUp,
 );
 
-userRouter.post('/logout', authentication, logOut);
+userRouter.post('/logout', authentication, userController.logOut);
 
-userRouter.post('/logoutall', authentication, logOutFromAllDevices);
+userRouter.post('/logoutall', authentication, userController.logOutFromAllDevices);
 
 // Export the router
 export { userRouter };

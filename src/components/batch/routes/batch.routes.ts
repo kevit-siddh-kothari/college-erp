@@ -1,4 +1,4 @@
-import { getBatch, addBatch } from '../controller/batch.controller';
+import { batchController } from '../controller/batch.controller';
 import { Router } from 'express';
 import { authorizationAdmin } from '../../../middlewear/authorization';
 import { authentication } from '../../../middlewear/auth';
@@ -14,8 +14,8 @@ batchRouter.post(
   validator.body('availableSeats').notEmpty().withMessage(`available seats i required`),
   validator.body('occupiedSeats').notEmpty().withMessage(`occupies seats is required`),
   validator.body('department').notEmpty().withMessage(`department is required`),
-  addBatch,
+  batchController.addBatch,
 );
-batchRouter.get('/get-allbatch', authentication, authorizationAdmin, getBatch);
+batchRouter.get('/get-allbatch', authentication, authorizationAdmin, batchController.getBatch);
 
 export { batchRouter };
