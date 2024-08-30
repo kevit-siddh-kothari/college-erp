@@ -7,6 +7,16 @@ const handleValidationErrors = (req: Request, res: Response, next: NextFunction)
     console.error(errors);
     return res.status(400).json({ errors: errors.array() });
   }
-  next();
+
+
+
+  
+  next();  
+
+
+
+
+
+
 };
 export { handleValidationErrors };
