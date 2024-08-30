@@ -33,13 +33,15 @@ class StudentController {
    */
   async addStudent(req: Request, res: Response): Promise<any> {
     try {
-      // const { name, phno, departmentname, batch, currentsem } = req.body;
       const departmenId = await Department.findOne({ _id: req.body.departmentid }, { _id: 1 });
       if (!departmenId) {
         return res.status(404).send(`No department with name ${req.body.departmentname} exists`);
       }
       //for checking the avaibaility of student entry in database
-      const batchData: IBatch = await Batch.find({ _id: req.body.batch, 'branches.departmentId':departmenId._id }, { branches: 1, _id: 0 }).lean();
+      const batchData: IBatch = await Batch.find(
+        { '_id': req.body.batch, 'branches.departmentId': departmenId._id },
+        { branches: 1, _id: 0 },
+      ).lean();
       if (batchData.length === 0) {
         return res.status(404).send(`no batch exist in the year ${req.body.batch}`);
       }
@@ -62,7 +64,7 @@ class StudentController {
       });
       await student.save();
       await Batch.updateOne(
-        { _id: req.body.batch, 'branches.departmentId': departmenId._id },
+        { '_id': req.body.batch, 'branches.departmentId': departmenId._id },
         { $inc: { 'branches.$.availableSeats': -1, 'branches.$.occupiedSeats': 1 } },
       );
 
@@ -113,7 +115,7 @@ class StudentController {
         return res.status(404).send(`no student esixts with this id ${id}`);
       }
       await Batch.updateOne(
-        { _id: exists.batch, 'branches.name': exists.department },
+        { '_id': exists.batch, 'branches.name': exists.department },
         { $inc: { 'branches.$.availableSeats': 1, 'branches.$.occupiedSeats': -1 } },
       );
       await Student.deleteOne({ _id: exists._id });
@@ -133,7 +135,6 @@ class StudentController {
    */
   async deleteAllStudents(req: Request, res: Response): Promise<any> {
     try {
-      
       await Student.deleteMany({});
       await Attendance.deleteMany({});
 
@@ -160,41 +161,41 @@ class StudentController {
       if (!date) {
         return res.status(400).json({ error: 'Date parameter is required.' });
       }
-  
+
       const startDay = new Date(date);
       startDay.setUTCHours(0, 0, 0, 0);
       const endDay = new Date(date);
       endDay.setUTCHours(23, 59, 59, 999);
-  
+
       // Fetch attendance records for the specific date
       const attendanceRecords = await Attendance.find(
         { createdAt: { $gte: startDay, $lte: endDay } },
-        { student: 1, _id: 0, isPresent: 1 }
+        { student: 1, _id: 0, isPresent: 1 },
       )
         .populate('student', 'batch currentsem department')
         .lean();
-      
+
       console.log(attendanceRecords);
 
       if (!attendanceRecords.length) {
         return res.status(404).json({ error: `No attendance records found for the date '${date}'.` });
       }
-      
+
       // Filter attendance records based on optional query parameters
       const filteredStudents = attendanceRecords.filter((record: any) => {
         const student = record.student;
-  
+
         const matchBatch = batch ? String(student.batch) === String(batch) : true;
         const matchBranch = branch ? String(student.department) === String(branch) : true;
         const matchCurrentsem = currentsem ? Number(student.currentsem) === Number(currentsem) : true;
-  
+
         return matchBatch && matchBranch && matchCurrentsem;
       });
-  
+
       if (!filteredStudents.length) {
         return res.status(404).json({ error: 'No matching students found based on the provided criteria.' });
       }
-  
+
       // Send the filtered list of absent students as response
       res.status(200).json(filteredStudents);
     } catch (error: any) {
@@ -202,7 +203,6 @@ class StudentController {
       res.status(500).json({ error: 'Internal Server Error. Please try again later.' });
     }
   }
-  
 
   async presentLessThan75(req: Request, res: Response): Promise<any> {
     const { branch, batch, currentsem } = req.query;

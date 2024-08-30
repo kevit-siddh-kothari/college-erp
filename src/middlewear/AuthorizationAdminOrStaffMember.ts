@@ -6,12 +6,16 @@ interface AuthenticatedRequest extends Request {
   token?: string;
 }
 
-const authorizationAdminOrStaff = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+const authorizationAdminOrStaff = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
     if (req.user?.role === 'admin' || req.user?.role === 'staffmember') {
       return next();
     }
-    res.status(403).send(`only admins or staffmembers are authorized to this path !`)
+    res.status(403).send(`only admins or staffmembers are authorized to this path !`);
   } catch (error: any) {
     res.status(500).send(error.message);
   }

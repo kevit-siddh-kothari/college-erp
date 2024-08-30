@@ -9,10 +9,10 @@ interface AuthenticatedRequest extends Request {
 const authorizationStudent = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
   try {
     if (req.user?.role === 'student') {
-        console.log('hell');
+      console.log('hell');
       return next();
     }
-    res.status(403).send(`only students are authorized to this path !`)
+    res.status(403).send(`only students are authorized to this path !`);
   } catch (error: any) {
     res.status(500).send(error.message);
   }

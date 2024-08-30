@@ -11,7 +11,7 @@ const authorizationAdmin = async (req: AuthenticatedRequest, res: Response, next
     if (req.user?.role === 'admin') {
       return next();
     }
-    res.status(403).send(`only admins are authorized to this path !`)
+    res.status(403).send(`only admins are authorized to this path !`);
   } catch (error: any) {
     res.status(500).send(error.message);
   }

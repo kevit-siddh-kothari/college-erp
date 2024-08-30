@@ -49,7 +49,7 @@ class UserController {
       const { username, password } = req.body;
       const user = await User.findOne({ username });
       if (!user) {
-        return res.status(404).json({error:'user not found'});
+        return res.status(404).json({ error: 'user not found' });
       }
 
       const match = bcrypt.compareSync(password, user.password);
@@ -57,7 +57,7 @@ class UserController {
         const token = await jwt.generateToken(user);
         res.send({ user, token });
       } else {
-        return res.status(401).json({error:'Password is incorrect'});
+        return res.status(401).json({ error: 'Password is incorrect' });
       }
     } catch (error: any) {
       console.error(`Error during log-in: ${error.message}`);
@@ -77,13 +77,13 @@ class UserController {
     try {
       if (!req.user || !req.token) {
         return res.status(400).send('User or token not found');
-      }    
+      }
       if (req.user && req.token) {
         req.user.tokens = req.user.tokens.filter((token: { token: string }) => token.token !== req.token);
         await req.user.save();
         res.send('Logged out successfully');
       } else {
-        return res.status(404).json({error:'user token not found'});
+        return res.status(404).json({ error: 'user token not found' });
       }
     } catch (error: any) {
       res.status(500).send(`Error during log-out: ${error.message}`);
@@ -105,7 +105,7 @@ class UserController {
         await req.user.save();
         res.send('Logged out from all devices successfully');
       } else {
-        return res.status(404).json({error:'user not found'});
+        return res.status(404).json({ error: 'user not found' });
       }
     } catch (error: any) {
       res.status(500).send(`Error during log-out from all devices: ${error.message}`);

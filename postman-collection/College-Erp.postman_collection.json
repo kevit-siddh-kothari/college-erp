@@ -1,797 +1,647 @@
 {
-	"info": {
-		"_postman_id": "1d358f54-0969-4fdc-910b-c12d45cd9624",
-		"name": "College-Erp",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "35959616"
-	},
-	"item": [
-		{
-			"name": "User",
-			"item": [
-				{
-					"name": "signup",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "username",
-									"value": "siddh12@mail.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "dkfj78901",
-									"type": "text"
-								},
-								{
-									"key": "role",
-									"value": "admin",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/user/signup",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"signup"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200){",
-									"    pm.environment.set('AUTHTOKEN', pm.response.json().token)",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"packages": {},
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "username",
-									"value": "siddh12@mail.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "dkfj78901",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/user/login",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "logout",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmJlZmMzMTEwZmE2NzZkZTM1NzZhNDYiLCJpYXQiOjE3MjM4MDAyOTl9.zP5pn2sa08Y4i23BskquFna8QAbpo0AK1qblkxjcwhc",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
-						"url": {
-							"raw": "{{college}}/api/user/logout",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"logout"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "logout-from-all-devices",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/user/logoutall",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"user",
-								"logoutall"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Student",
-			"item": [
-				{
-					"name": "add-student",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "name",
-									"value": "siddh koth",
-									"type": "text"
-								},
-								{
-									"key": "phno",
-									"value": "9426569523",
-									"type": "text"
-								},
-								{
-									"key": "departmentname",
-									"value": "ce",
-									"type": "text"
-								},
-								{
-									"key": "batch",
-									"value": "2024",
-									"type": "text"
-								},
-								{
-									"key": "currentsem",
-									"value": "7",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/students/add-student",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"add-student"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get-all-students",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
-						"url": {
-							"raw": "{{college}}/api/students/all-students",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"all-students"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "analytics-data",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/students/getanalytics",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"getanalytics"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get-absent-students",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/students/absent/:date?batch=&branch=ce&currentsem",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"absent",
-								":date"
-							],
-							"query": [
-								{
-									"key": "batch",
-									"value": ""
-								},
-								{
-									"key": "branch",
-									"value": "ce"
-								},
-								{
-									"key": "currentsem",
-									"value": null
-								}
-							],
-							"variable": [
-								{
-									"key": "date",
-									"value": "2024-08-21"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "present-lessthan75",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/students/presentlessthan75",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"presentlessthan75"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "vacant-seats",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/students/vacantseats?batch=2024&branch=it",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"vacantseats"
-							],
-							"query": [
-								{
-									"key": "batch",
-									"value": "2024"
-								},
-								{
-									"key": "branch",
-									"value": "it"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update student",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "phno",
-									"value": "9879225921",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/students/update-student/:id",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"update-student",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete-student-id",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/students/delete-student/:id",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"delete-student",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete-all-student",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/students/deleteall-students",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"students",
-								"deleteall-students"
-							]
-						}
-					},
-					"response": []
-				}
-			],
-			"description": "Diffrent routes for adding, updating and deleting are present\n\n- one must be authenticated in post of admin or staffmembers\n    \n- dont change the http request method else the request wont work\n    \n- student will only be authenticated for viewing all students not authorized for permoing operations on databases"
-		},
-		{
-			"name": "Department",
-			"item": [
-				{
-					"name": "add-departmet",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "departmentname",
-									"value": "ec",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/departments/add-department",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"departments",
-								"add-department"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get-all-departmets",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/departments/all-department",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"departments",
-								"all-department"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update-department",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "departmentname",
-									"value": "civil",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/departments/update-department/:id",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"departments",
-								"update-department",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "66bf2622178cbee83edb5c22"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete-department-id",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/departments/delete-department/:id",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"departments",
-								"delete-department",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "66bf2622178cbee83edb5c22"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete-all-department",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{college}}/api/departments/deleteall-department",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"departments",
-								"deleteall-department"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Batch",
-			"item": [
-				{
-					"name": "add-batch",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "year",
-									"value": "2028",
-									"type": "text"
-								},
-								{
-									"key": "totalStudentsIntake",
-									"value": "500",
-									"type": "text"
-								},
-								{
-									"key": "availableSeats",
-									"value": "49955",
-									"type": "text"
-								},
-								{
-									"key": "occupiedSeats",
-									"value": "0",
-									"type": "text"
-								},
-								{
-									"key": "department",
-									"value": "IT",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/batch/add-batch",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"batch",
-								"add-batch"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get-allbatches",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
-						"url": {
-							"raw": "{{college}}/api/batch/get-allbatch",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"batch",
-								"get-allbatch"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Attendance",
-			"item": [
-				{
-					"name": "add-attendance",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "isPresent",
-									"value": "false",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/attendance/add-attendance/:id",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"attendance",
-								"add-attendance",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "66c5b1ca7d3123793385966b"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get-attendance",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": []
-						},
-						"url": {
-							"raw": "{{college}}/api/attendance/all-attendance",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"attendance",
-								"all-attendance"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update-attendance",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "isPresent",
-									"value": "true",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{college}}/api/attendance/update-attendance/:id/:date",
-							"host": [
-								"{{college}}"
-							],
-							"path": [
-								"api",
-								"attendance",
-								"update-attendance",
-								":id",
-								":date"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": "66c5866129b3f099f7b60e3c"
-								},
-								{
-									"key": "date",
-									"value": "2024-08-21T06:37:38.830+00:00"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "StudentInformation",
-			"item": [
-				{
-					"name": "StudentAuthenticatedData",
-					"request": {
-						"method": "GET",
-						"header": []
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{AUTHTOKEN}}",
-				"type": "string"
-			}
-		]
-	},
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"packages": {},
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"packages": {},
-				"exec": [
-					""
-				]
-			}
-		}
-	]
+  "info": {
+    "_postman_id": "1d358f54-0969-4fdc-910b-c12d45cd9624",
+    "name": "College-Erp",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "35959616"
+  },
+  "item": [
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "signup",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "siddh12@mail.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "dkfj78901",
+                  "type": "text"
+                },
+                {
+                  "key": "role",
+                  "value": "admin",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/user/signup",
+              "host": ["{{college}}"],
+              "path": ["api", "user", "signup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200){",
+                  "    pm.environment.set('AUTHTOKEN', pm.response.json().token)",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "packages": {},
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "siddh12@mail.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "dkfj78901",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/user/login",
+              "host": ["{{college}}"],
+              "path": ["api", "user", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NmJlZmMzMTEwZmE2NzZkZTM1NzZhNDYiLCJpYXQiOjE3MjM4MDAyOTl9.zP5pn2sa08Y4i23BskquFna8QAbpo0AK1qblkxjcwhc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{college}}/api/user/logout",
+              "host": ["{{college}}"],
+              "path": ["api", "user", "logout"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout-from-all-devices",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/user/logoutall",
+              "host": ["{{college}}"],
+              "path": ["api", "user", "logoutall"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Student",
+      "item": [
+        {
+          "name": "add-student",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "name",
+                  "value": "siddh koth",
+                  "type": "text"
+                },
+                {
+                  "key": "phno",
+                  "value": "9426569523",
+                  "type": "text"
+                },
+                {
+                  "key": "departmentname",
+                  "value": "ce",
+                  "type": "text"
+                },
+                {
+                  "key": "batch",
+                  "value": "2024",
+                  "type": "text"
+                },
+                {
+                  "key": "currentsem",
+                  "value": "7",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/students/add-student",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "add-student"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-all-students",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{college}}/api/students/all-students",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "all-students"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "analytics-data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/students/getanalytics",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "getanalytics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-absent-students",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/students/absent/:date?batch=&branch=ce&currentsem",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "absent", ":date"],
+              "query": [
+                {
+                  "key": "batch",
+                  "value": ""
+                },
+                {
+                  "key": "branch",
+                  "value": "ce"
+                },
+                {
+                  "key": "currentsem",
+                  "value": null
+                }
+              ],
+              "variable": [
+                {
+                  "key": "date",
+                  "value": "2024-08-21"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "present-lessthan75",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/students/presentlessthan75",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "presentlessthan75"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "vacant-seats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/students/vacantseats?batch=2024&branch=it",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "vacantseats"],
+              "query": [
+                {
+                  "key": "batch",
+                  "value": "2024"
+                },
+                {
+                  "key": "branch",
+                  "value": "it"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update student",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "phno",
+                  "value": "9879225921",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/students/update-student/:id",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "update-student", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete-student-id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/students/delete-student/:id",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "delete-student", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete-all-student",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/students/deleteall-students",
+              "host": ["{{college}}"],
+              "path": ["api", "students", "deleteall-students"]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Diffrent routes for adding, updating and deleting are present\n\n- one must be authenticated in post of admin or staffmembers\n    \n- dont change the http request method else the request wont work\n    \n- student will only be authenticated for viewing all students not authorized for permoing operations on databases"
+    },
+    {
+      "name": "Department",
+      "item": [
+        {
+          "name": "add-departmet",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "departmentname",
+                  "value": "ec",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/departments/add-department",
+              "host": ["{{college}}"],
+              "path": ["api", "departments", "add-department"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-all-departmets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/departments/all-department",
+              "host": ["{{college}}"],
+              "path": ["api", "departments", "all-department"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update-department",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "departmentname",
+                  "value": "civil",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/departments/update-department/:id",
+              "host": ["{{college}}"],
+              "path": ["api", "departments", "update-department", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "66bf2622178cbee83edb5c22"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete-department-id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/departments/delete-department/:id",
+              "host": ["{{college}}"],
+              "path": ["api", "departments", "delete-department", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "66bf2622178cbee83edb5c22"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete-all-department",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{college}}/api/departments/deleteall-department",
+              "host": ["{{college}}"],
+              "path": ["api", "departments", "deleteall-department"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Batch",
+      "item": [
+        {
+          "name": "add-batch",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "year",
+                  "value": "2028",
+                  "type": "text"
+                },
+                {
+                  "key": "totalStudentsIntake",
+                  "value": "500",
+                  "type": "text"
+                },
+                {
+                  "key": "availableSeats",
+                  "value": "49955",
+                  "type": "text"
+                },
+                {
+                  "key": "occupiedSeats",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "department",
+                  "value": "IT",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/batch/add-batch",
+              "host": ["{{college}}"],
+              "path": ["api", "batch", "add-batch"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-allbatches",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{college}}/api/batch/get-allbatch",
+              "host": ["{{college}}"],
+              "path": ["api", "batch", "get-allbatch"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "add-attendance",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "isPresent",
+                  "value": "false",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/attendance/add-attendance/:id",
+              "host": ["{{college}}"],
+              "path": ["api", "attendance", "add-attendance", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "66c5b1ca7d3123793385966b"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-attendance",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": []
+            },
+            "url": {
+              "raw": "{{college}}/api/attendance/all-attendance",
+              "host": ["{{college}}"],
+              "path": ["api", "attendance", "all-attendance"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update-attendance",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "isPresent",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{college}}/api/attendance/update-attendance/:id/:date",
+              "host": ["{{college}}"],
+              "path": ["api", "attendance", "update-attendance", ":id", ":date"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "66c5866129b3f099f7b60e3c"
+                },
+                {
+                  "key": "date",
+                  "value": "2024-08-21T06:37:38.830+00:00"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "StudentInformation",
+      "item": [
+        {
+          "name": "StudentAuthenticatedData",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{AUTHTOKEN}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "exec": [""]
+      }
+    }
+  ]
 }

@@ -16,7 +16,7 @@ const authentication = async (req: AuthenticatedRequest, res: Response, next: Ne
     if (!token) {
       throw new Error('Token is missing');
     }
-    const secretKey:any= process.env.JWTSECRET;
+    const secretKey: any = process.env.JWTSECRET;
     const decoded = jwt.verify(token, secretKey) as { _id: string };
     const user = await User.findOne({ '_id': decoded._id, 'tokens.token': token });
 

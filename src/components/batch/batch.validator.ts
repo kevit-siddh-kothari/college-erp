@@ -1,4 +1,4 @@
-import {body} from 'express-validator';
+import { body } from 'express-validator';
 
 const addBatch: any[] = [
   body('year').notEmpty().isNumeric().withMessage(`year is required`),
@@ -8,5 +8,4 @@ const addBatch: any[] = [
   body('department').notEmpty().isString().withMessage(`department is required`),
 ];
 
-
-export {addBatch};
+export { addBatch };

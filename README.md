@@ -1,6 +1,7 @@
 # College ERP System
 
 ## Description
+
 The College ERP System is a backend-focused project developed using TypeScript and Node.js. The system includes comprehensive authentication and authorization features for different user roles, including `admin` and `staff member`. The project flow is as follows:
 
 1. **User Signup:**  
@@ -15,18 +16,21 @@ The College ERP System is a backend-focused project developed using TypeScript a
 4. **Batch Creation:**  
    Batches are created within specific departments.
 
-5. **Student Management:**  
+5. **Student Management:**
+
    - Students are created within specific batches and departments.
    - Upon creating a student, the system automatically adjusts seat availability in the relevant batch.
 
-6. **Attendance Management:**  
+6. **Attendance Management:**
+
    - Attendance for students can be triggered as required.
    - Deleting a student will also remove their associated attendance records, and batch/seat availability will be updated.
 
-7. **Batch Deletion:**  
+7. **Batch Deletion:**
+
    - Deleting a batch will remove all students associated with that batch.
 
-8. **Department Deletion:**  
+8. **Department Deletion:**
    - Deleting a department will remove the department from all associated batches and delete all students within those batches.
 
 ---
@@ -48,31 +52,35 @@ The College ERP System is a backend-focused project developed using TypeScript a
 ## Installation
 
 1. Clone the repository:
-    ```bash
-    git clone https://github.com/kevit-siddh-kothari/college-erp.git
-    ```
+
+   ```bash
+   git clone https://github.com/kevit-siddh-kothari/college-erp.git
+   ```
 
 2. Navigate to the project directory:
-    ```bash
-    cd college-erp
-    ```
+
+   ```bash
+   cd college-erp
+   ```
 
 3. Install dependencies:
-    ```bash
-    npm install or npm i (node version used is 22)
-    ```
+
+   ```bash
+   npm install or npm i (node version used is 22)
+   ```
 
 4. Create a `.env` file in the root directory and add your environment variables:
-    ```bash
-    PORT=your port
-    MONGO_URI=your_mongodb_uri
-    JWT_SECRET=your_jwt_secret
-    ```
+
+   ```bash
+   PORT=your port
+   MONGO_URI=your_mongodb_uri
+   JWT_SECRET=your_jwt_secret
+   ```
 
 5. Start the server:
-    ```bash
-    npm run dev
-    ```
+   ```bash
+   npm run dev
+   ```
 
 ## API Documentation (Export Postman Collection in you project)
 
@@ -276,6 +284,3 @@ The College ERP System is a backend-focused project developed using TypeScript a
      - `date` (ISO date, required)
    - **Body Parameters:**
      - `isPresent` (boolean, required)
-
-
-

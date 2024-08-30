@@ -6,11 +6,11 @@ import { userRouter } from './components/user/user.routes';
 import { departmentRouter } from './components/department/department.route';
 import { attendanceRouter } from './components/attendance/attendance.routes';
 import { batchRouter } from './components/batch/batch.routes';
-import {authentication} from './middlewear/auth.middlewear';
-import {authorizationAdmin} from './middlewear/authorization.middlewear';
-import {authorizationAdminOrStaff} from './middlewear/AuthorizationAdminOrStaffMember';
-import {authorizationStudent} from './middlewear/authorizationStudent';
-import {studentInfRouter} from './components/studentInf/stydentInf.route';
+import { authentication } from './middlewear/auth.middlewear';
+import { authorizationAdmin } from './middlewear/authorization.middlewear';
+import { authorizationAdminOrStaff } from './middlewear/AuthorizationAdminOrStaffMember';
+import { authorizationStudent } from './middlewear/authorizationStudent';
+import { studentInfRouter } from './components/studentInf/stydentInf.route';
 import bodyParser from 'body-parser';
 
 dotenv.config();
@@ -37,11 +37,11 @@ app.use(express.urlencoded({ extended: false }));
 /*******************************
  * MIDDLEWARE - ROUTES
  *******************************/
-app.use('/api/user',userRouter);
-app.use('/api/students',authentication, authorizationAdminOrStaff, studentRouter);
-app.use('/api/departments',authentication,authorizationAdmin, departmentRouter);
-app.use('/api/attendance', authentication, authorizationAdminOrStaff,attendanceRouter);
-app.use('/api/batch',authentication,authorizationAdmin, batchRouter);
-app.use('/student', authentication, authorizationStudent, studentInfRouter)
+app.use('/api/user', userRouter);
+app.use('/api/students', authentication, authorizationAdminOrStaff, studentRouter);
+app.use('/api/departments', authentication, authorizationAdmin, departmentRouter);
+app.use('/api/attendance', authentication, authorizationAdminOrStaff, attendanceRouter);
+app.use('/api/batch', authentication, authorizationAdmin, batchRouter);
+app.use('/student', authentication, authorizationStudent, studentInfRouter);
 
 export { app, port };

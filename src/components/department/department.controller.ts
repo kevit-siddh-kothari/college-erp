@@ -68,7 +68,7 @@ class DepartmentController {
       const { id } = req.params;
       const department: IDepartment | null = await Department.findById(id);
       if (!department) {
-        return res.status(404).json({error:'No department with ID ${id} exists in the database'});
+        return res.status(404).json({ error: 'No department with ID ${id} exists in the database' });
       }
       const body: Partial<IDepartment> = req.body;
       for (const key in body) {
@@ -96,7 +96,7 @@ class DepartmentController {
       const { id } = req.params;
       const department: IDepartment | null = await Department.findById(id);
       if (!department) {
-        return res.status(404).json({error:`department not found with name ${id}`});
+        return res.status(404).json({ error: `department not found with name ${id}` });
       }
       await Attendance.deleteMany({ department: id });
       await Student.deleteMany({ department: id });

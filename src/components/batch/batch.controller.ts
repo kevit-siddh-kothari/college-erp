@@ -33,7 +33,7 @@ class BatchController {
     try {
       const departmentId: IDepartment | null = await Department.findOne({ departmentname: req.body.department });
       if (!departmentId) {
-        return res.status(404).json({error:`no department exist with name ${departmentId}`});
+        return res.status(404).json({ error: `no department exist with name ${departmentId}` });
       }
 
       const checkForExistingBatch: IBatch | null = await Batch.findOne({ year: req.body.year });
@@ -46,25 +46,25 @@ class BatchController {
         };
         await Batch.updateOne(
           {
-            year:req.body.year,
+            'year': req.body.year,
             'branches.departmentId': newBranch.departmentId, // Match by departmentId
           },
           {
             $set: {
               'branches.$': newBranch, // Update existing branch
             },
-          }
+          },
         );
-  
+
         // If no branch was updated (i.e., branch with departmentId was not found), push a new branch
         await Batch.updateOne(
           {
-            year:req.body.year,
+            'year': req.body.year,
             'branches.departmentId': { $ne: newBranch.departmentId }, // Ensure the branch doesn't exist
           },
           {
             $push: { branches: newBranch }, // Push the new branch
-          }
+          },
         );
         res.send('Batch data updated successfully');
         return;
@@ -90,8 +90,6 @@ class BatchController {
     }
   }
 }
-
-
 
 // Export the controller as an instance
 export const batchController = new BatchController();
