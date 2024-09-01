@@ -2,7 +2,7 @@ import { param, body } from 'express-validator';
 
 const updateStudentValidator: any[] = [
   param('id').isMongoId().withMessage('Invalid student ID'),
-  body('username').notEmpty().isString().withMessage('userName is required'),
+  body('username').optional().isString().withMessage('userName is required'),
   body('name').optional().isString().notEmpty().withMessage('Name cannot be empty'),
   body('phno').optional().isNumeric().withMessage('Phone number must be numeric'),
   body('departmentid').optional().notEmpty().withMessage('Department cannot be empty'),
@@ -16,8 +16,8 @@ const addStudentValidator: any[] = [
   body('username').notEmpty().isString().withMessage('userName is required'),
   body('name').notEmpty().isString().withMessage('Name is required'),
   body('phno').notEmpty().isNumeric().withMessage('Phone number is required and must be numeric'),
-  body('departmentid').notEmpty().withMessage('Department is required'),
-  body('batch').notEmpty().withMessage('Batch is required'),
+  body('departmentid').isMongoId().notEmpty().withMessage('Department is required'),
+  body('batch').isMongoId().notEmpty().withMessage('Batch is required'),
   body('currentsem')
     .notEmpty()
     .isInt({ min: 1 })

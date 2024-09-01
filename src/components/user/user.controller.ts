@@ -2,8 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { User, IUser } from './user.module';
 import bcrypt from 'bcrypt';
 import * as jwt from './jwt.token';
-import { validationResult, Result } from 'express-validator';
-import { error } from 'console';
+import {logger} from '../../utils/winstone.logger';
 
 // Extending the Request interface to include user and token properties for authenticated requests
 interface AuthenticatedRequest extends Request {
@@ -28,11 +27,11 @@ class UserController {
       const { username, password, role } = req.body;
       const user = new User({ username, password, role });
       await user.save();
-
-      res.status(201).send('User created successfully');
+      logger.info(`User created successfully`);
+      return res.status(201).json({message:'User created successfully'});
     } catch (error: any) {
-      console.error(`Error during sign-up: ${error.message}`);
-      res.status(500).send(error.message);
+      logger.error(`Error during sign-up: ${error.message}`);
+      return res.status(500).json({error: error.message});
     }
   }
 
@@ -49,19 +48,21 @@ class UserController {
       const { username, password } = req.body;
       const user = await User.findOne({ username });
       if (!user) {
+        logger.error(`User not found`);
         return res.status(404).json({ error: 'user not found' });
       }
 
       const match = bcrypt.compareSync(password, user.password);
       if (match) {
         const token = await jwt.generateToken(user);
-        res.send({ user, token });
+        return res.json({ user, token });
       } else {
+        logger.error(`password is incorrect`);
         return res.status(401).json({ error: 'Password is incorrect' });
       }
     } catch (error: any) {
-      console.error(`Error during log-in: ${error.message}`);
-      res.status(500).send(error.message);
+      logger.error(`Error during log-in: ${error.message}`);
+      res.status(500).json({error: error.message});
     }
   }
 
@@ -76,17 +77,18 @@ class UserController {
   public async logOut(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<any> {
     try {
       if (!req.user || !req.token) {
-        return res.status(400).send('User or token not found');
+        return res.status(400).json({error:'User or token not found'});
       }
       if (req.user && req.token) {
         req.user.tokens = req.user.tokens.filter((token: { token: string }) => token.token !== req.token);
         await req.user.save();
-        res.send('Logged out successfully');
+        return res.json({message:'Logged out successfully'});
       } else {
         return res.status(404).json({ error: 'user token not found' });
       }
     } catch (error: any) {
-      res.status(500).send(`Error during log-out: ${error.message}`);
+      logger.error(`Error during log-out: ${error.message}`);
+      return res.status(500).json({error:`Error during log-out: ${error.message}`});
     }
   }
 
@@ -103,12 +105,12 @@ class UserController {
       if (req.user) {
         req.user.tokens = [];
         await req.user.save();
-        res.send('Logged out from all devices successfully');
+        res.json({error:'Logged out from all devices successfully'});
       } else {
         return res.status(404).json({ error: 'user not found' });
       }
     } catch (error: any) {
-      res.status(500).send(`Error during log-out from all devices: ${error.message}`);
+      res.status(500).json({error:`Error during log-out from all devices: ${error.message}`});
     }
   }
 }

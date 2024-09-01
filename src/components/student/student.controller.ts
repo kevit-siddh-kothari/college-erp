@@ -3,6 +3,7 @@ import { Student, IStudent } from './student.module';
 import { Department } from '../department/department.module';
 import { Attendance } from '../attendance/attendance.module';
 import { Batch, IBatch } from '../batch/batch.module';
+import {logger} from '../../utils/winstone.logger';
 
 class StudentController {
   /**
@@ -19,7 +20,7 @@ class StudentController {
 
       res.status(200).json(students);
     } catch (error: any) {
-      console.error(`Error fetching students: ${error.message}`);
+      logger.error(`Error fetching students: ${error.message}`);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }
@@ -35,15 +36,17 @@ class StudentController {
     try {
       const departmenId = await Department.findOne({ _id: req.body.departmentid }, { _id: 1 });
       if (!departmenId) {
-        return res.status(404).send(`No department with name ${req.body.departmentname} exists`);
+        logger.error(`No department with name ${req.body.departmentname} exists`);
+        return res.status(404).json({error:`No department with name ${req.body.departmentname} exists`});
       }
       //for checking the avaibaility of student entry in database
       const batchData: IBatch = await Batch.find(
-        { '_id': req.body.batch, 'branches.departmentId': departmenId._id },
+        { _id: req.body.batch, 'branches.departmentId': departmenId._id },
         { branches: 1, _id: 0 },
       ).lean();
       if (batchData.length === 0) {
-        return res.status(404).send(`no batch exist in the year ${req.body.batch}`);
+        logger.error(`no batch exist in the year ${req.body.batch}`);
+        return res.status(404).json({error:`no batch exist in the year ${req.body.batch} please also check that department is current available`});
       }
       batchData.forEach((item: any) => {
         item.branches.forEach((branch: any) => {
@@ -68,9 +71,10 @@ class StudentController {
         { $inc: { 'branches.$.availableSeats': -1, 'branches.$.occupiedSeats': 1 } },
       );
 
-      res.status(201).send(`student created sucessfully with default present attendance`);
+      res.status(201).json({message:`student created sucessfully with default present attendance`});
     } catch (error: any) {
-      res.status(500).send(error.message);
+      logger.error(error.any);
+      res.status(500).json({error:error.message});
     }
   }
 
@@ -86,16 +90,18 @@ class StudentController {
       const { id } = req.params;
       const student: IStudent | null = await Student.findOne({ _id: id });
       if (!student) {
-        return res.status(404).send(`no student esixts bu this id ${id}`);
+        logger.error(`no student esixts bu this id ${id}`);
+        return res.status(404).json({error:`no student esixts for this id ${id}`});
       }
       const body: IStudent = req.body;
       for (let a in body) {
         student[a] = body[a];
       }
       await student.save();
-      res.send('task Updated sucessfully');
-    } catch (error) {
-      res.status(500).send(error);
+      res.status(200).json({message:'student Updated sucessfully'});
+    } catch (error: any) {
+      logger.error(error.message);
+      res.status(500).send(error.message);
     }
   }
 
@@ -112,17 +118,19 @@ class StudentController {
       const { id } = req.params;
       const exists: IStudent | null = await Student.findOne({ _id: id });
       if (!exists) {
-        return res.status(404).send(`no student esixts with this id ${id}`);
+        logger.error(`no student esixts with this id ${id}`);
+        return res.status(404).json({error:`no student esixts with this id ${id}`});
       }
       await Batch.updateOne(
-        { '_id': exists.batch, 'branches.name': exists.department },
+        { '_id': exists.batch, 'branches.departmentId': exists.department },
         { $inc: { 'branches.$.availableSeats': 1, 'branches.$.occupiedSeats': -1 } },
       );
       await Student.deleteOne({ _id: exists._id });
       await Attendance.deleteMany({ student: exists._id });
-      res.send(`student deleted sucessfully!`);
+      res.json({error: `student deleted sucessfully!`});
     } catch (error: any) {
-      res.status(500).send(error.message);
+      logger.error(error.message);
+      res.status(500).json({error: error.message});
     }
   }
 
@@ -135,10 +143,26 @@ class StudentController {
    */
   async deleteAllStudents(req: Request, res: Response): Promise<any> {
     try {
+      const TotalStudentCounnt = await Student.aggregate([
+        {
+          $group: {
+            _id: {
+              batch: "$batch",
+              department: "$department"
+            },
+            count: { $sum: 1 }
+          }
+        }
+      ])
+      for(let student = 0; student<TotalStudentCounnt.length; student++){
+        await Batch.updateOne(
+          { '_id': TotalStudentCounnt[student]._id.batch, 'branches.departmentId': TotalStudentCounnt[student]._id.department },
+          { $inc: { 'branches.$.availableSeats': 1, 'branches.$.occupiedSeats': -1 } },
+        );
+      }
       await Student.deleteMany({});
       await Attendance.deleteMany({});
-
-      res.send(`All students data is cleared`);
+      res.status(200).json({message:`All students data is cleared`});
     } catch (error: any) {
       res.status(400).send(error.message);
     }
@@ -157,8 +181,8 @@ class StudentController {
     try {
       const { date } = req.params;
       const { batch, branch, currentsem } = req.query;
-      console.log(batch);
       if (!date) {
+        logger.error(`Date parameter is required.`);
         return res.status(400).json({ error: 'Date parameter is required.' });
       }
 
@@ -178,13 +202,13 @@ class StudentController {
       console.log(attendanceRecords);
 
       if (!attendanceRecords.length) {
+        logger.error(`No attendance records found for the date '${date} please add attendance`);
         return res.status(404).json({ error: `No attendance records found for the date '${date}'.` });
       }
 
       // Filter attendance records based on optional query parameters
       const filteredStudents = attendanceRecords.filter((record: any) => {
         const student = record.student;
-
         const matchBatch = batch ? String(student.batch) === String(batch) : true;
         const matchBranch = branch ? String(student.department) === String(branch) : true;
         const matchCurrentsem = currentsem ? Number(student.currentsem) === Number(currentsem) : true;
@@ -193,18 +217,20 @@ class StudentController {
       });
 
       if (!filteredStudents.length) {
+        logger.error('No matching students found based on the provided criteria.')
         return res.status(404).json({ error: 'No matching students found based on the provided criteria.' });
       }
 
       // Send the filtered list of absent students as response
       res.status(200).json(filteredStudents);
     } catch (error: any) {
-      console.error('Error fetching absent students:', error);
+      logger.error('Error fetching absent students:', error);
       res.status(500).json({ error: 'Internal Server Error. Please try again later.' });
     }
   }
 
   async presentLessThan75(req: Request, res: Response): Promise<any> {
+   try{
     const { branch, batch, currentsem } = req.query;
     const attendance = await Attendance.aggregate([
       // Stage 1: Lookup to populate student details
@@ -230,15 +256,16 @@ class StudentController {
         },
       },
     ]);
-
     let branchId: unknown;
     if (branch) {
-      const department = await Department.findOne({ departmentname: branch }, { _id: 1 }).lean();
+      const department = await Department.findOne({ _id: branch }, { _id: 1 }).lean();
       if (!department) {
+        logger.error(`Branch '${branch}' not found.`);
         res.status(404).json({ error: `Branch '${branch}' not found.` });
         return;
       }
       branchId = department._id;
+      console.log(branchId);
     }
 
     const data: {}[] = [];
@@ -246,16 +273,21 @@ class StudentController {
       if (record.TotalPresent < 23) {
         const student = record._id;
 
-        const matchBatch = batch ? student.batch === Number(batch) : true;
-        const matchBranch = branch ? String(student.department) === String(branchId) : true;
+        const matchBatch = batch ? String(student.batch) === String(batch) : true;
+        const matchBranch = branch ? String(student.department) === String(branch) : true;
         const matchCurrentsem = currentsem ? student.currentsem === Number(currentsem) : true;
         return matchBatch && matchBranch && matchCurrentsem;
       }
     });
-    res.send(filteredStudents);
+    res.status(200).json(filteredStudents);
+   }catch(error: any){
+    logger.error(`error.message`);
+    res.status(500).send(error.message);
+   }
   }
 
   public async getAnalyticsData(req: Request, res: Response) {
+    try{
     const analyticsData = await Student.aggregate([
       // Stage 1: Lookup to populate department details
       {
@@ -323,7 +355,11 @@ class StudentController {
         },
       },
     ]);
-    res.send(analyticsData);
+    res.status(200).json(analyticsData);
+    }catch(error: any){
+      logger.error(error.message);
+      res.status(500).json({error: error.message});
+    }
   }
 
   public async getVacantSeats(req: Request, res: Response): Promise<any> {
@@ -359,9 +395,9 @@ class StudentController {
         arr.push(batchobj);
       }
 
-      res.send(arr);
+      res.status(200).json(arr);
     } catch (error: any) {
-      res.status(500).send(error.message);
+      res.status(500).json({error:error.message});
     }
   }
 }

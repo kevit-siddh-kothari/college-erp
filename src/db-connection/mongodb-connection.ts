@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { logger } from '../utils/winstone.logger';
 
 /**
  * Establishes a connection to the MongoDB database.
@@ -14,7 +15,7 @@ const connectionToDb = async (url: string | undefined): Promise<void> => {
       .catch(err => console.log(err));
     return;
   }
-  console.log('MongoDB failed to connect');
+  logger.error('MongoDB failed to connect');
 };
 
 export { connectionToDb };

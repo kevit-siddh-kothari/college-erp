@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Batch, IBatch } from './batch.module';
 import { Department, IDepartment } from '../department/department.module';
-import { validationResult } from 'express-validator';
+import {logger} from '../../utils/winstone.logger'; // Import the logger
 
 class BatchController {
   /**
@@ -15,9 +15,10 @@ class BatchController {
   public async getBatch(req: Request, res: Response): Promise<any> {
     try {
       const batch = await Batch.find({}).lean();
-      res.send(batch);
+      res.status(200).json(batch);
     } catch (error: any) {
-      res.status(400).send(error.message);
+      logger.error(`Failed to get batches: ${error.message}`);
+      res.status(400).json({ error: error.message });
     }
   }
 
@@ -31,9 +32,9 @@ class BatchController {
    */
   public async addBatch(req: Request, res: Response): Promise<any> {
     try {
-      const departmentId: IDepartment | null = await Department.findOne({ departmentname: req.body.department });
+      const departmentId: IDepartment | null = await Department.findOne({ _id: req.body.department });
       if (!departmentId) {
-        return res.status(404).json({ error: `no department exist with name ${departmentId}` });
+        return res.status(404).json({ error: `No department exists with name ${req.body.department}` });
       }
 
       const checkForExistingBatch: IBatch | null = await Batch.findOne({ year: req.body.year });
@@ -44,29 +45,28 @@ class BatchController {
           availableSeats: req.body.availableSeats,
           occupiedSeats: req.body.occupiedSeats,
         };
-        await Batch.updateOne(
+        const updateResult = await Batch.updateOne(
           {
             'year': req.body.year,
-            'branches.departmentId': newBranch.departmentId, // Match by departmentId
+            'branches.departmentId': newBranch.departmentId,
           },
           {
             $set: {
-              'branches.$': newBranch, // Update existing branch
+              'branches.$': newBranch,
             },
-          },
+          }
         );
+          await Batch.updateOne(
+            {
+              'year': req.body.year,
+              'branches.departmentId': { $ne: newBranch.departmentId },
+            },
+            {
+              $push: { branches: newBranch },
+            }
+          );
 
-        // If no branch was updated (i.e., branch with departmentId was not found), push a new branch
-        await Batch.updateOne(
-          {
-            'year': req.body.year,
-            'branches.departmentId': { $ne: newBranch.departmentId }, // Ensure the branch doesn't exist
-          },
-          {
-            $push: { branches: newBranch }, // Push the new branch
-          },
-        );
-        res.send('Batch data updated successfully');
+        res.status(200).json({ message: 'Batch data updated successfully' });
         return;
       }
 
@@ -84,9 +84,10 @@ class BatchController {
         },
       ];
       await Batch.create(batchData);
-      res.send('Batch created successfully!');
+      res.status(201).json({ message: 'Batch created successfully!' });
     } catch (error: any) {
-      res.status(500).send(error.message);
+      logger.error(`Failed to add or update batch: ${error.message}`);
+      res.status(500).json({ error: error.message });
     }
   }
 }

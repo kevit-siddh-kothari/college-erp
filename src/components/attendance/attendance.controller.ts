@@ -1,5 +1,6 @@
 import { Attendance, IAttendance } from './attendance.module';
 import { Request, Response } from 'express';
+import {logger} from '../../utils/winstone.logger'; // Import the logger
 
 class AttendanceController {
   /**
@@ -13,9 +14,10 @@ class AttendanceController {
   public async getAllStudentAttendance(req: Request, res: Response): Promise<any> {
     try {
       const data = await Attendance.find({}).populate('student').lean();
-      res.send(data);
+      res.status(200).json(data);
     } catch (error: any) {
-      res.status(500).send(error.message);
+      logger.error(`Failed to get student attendance records: ${error.message}`);
+      res.status(500).json({ error: error.message });
     }
   }
 
@@ -33,9 +35,10 @@ class AttendanceController {
       const { isPresent } = req.body;
       const attendance = new Attendance({ student: id, isPresent });
       await attendance.save();
-      res.send('Attendance created successfully');
+      res.status(201).json({ message: 'Attendance created successfully' });
     } catch (error: any) {
-      res.status(500).send(error.message);
+
+      res.status(500).json({ error: error.message });
     }
   }
 
@@ -52,7 +55,7 @@ class AttendanceController {
       const { id, date } = req.params;
       const data: IAttendance | null = await Attendance.findOne({ student: id, createdAt: date });
       if (!data) {
-        return res.status(404).send(`No attendance record found for student with ID: ${id} on ${date}`);
+        return res.status(404).json({ error: `No attendance record found for student with ID: ${id} on ${date}` });
       }
       const body = req.body;
       for (const key in body) {
@@ -61,9 +64,9 @@ class AttendanceController {
         }
       }
       await data.save();
-      res.send('Attendance updated successfully');
+      res.status(200).json({ message: 'Attendance updated successfully' });
     } catch (error: any) {
-      res.status(500).send(error.message);
+      res.status(500).json({ error: error.message });
     }
   }
 }
