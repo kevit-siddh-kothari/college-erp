@@ -5,9 +5,9 @@ const request = require('supertest');
 const {app } = require('../index');
 
 const userOne = {
-  username: 'sidg5678d1',
-  password: 'skjdkjds',
-  role: 'admin',
+  username: "sidg5678d1@gmail.com",
+  password: "skjdkjds",
+  role: "admin",
 };
 
 const studentOne = {
@@ -35,8 +35,8 @@ describe('Testing of users api', () => {
   let token: string;
 
   beforeAll(async () => {
-    await request(app).post('/api/user/signup').body(userOne).expect(201);
-  }, 9000);
+    await request(app).post('/api/user/signup').send(userOne).expect(201);
+  }, 8000);
 
   afterAll(async () => {
     await User.deleteOne({ username: userOne.username });
@@ -46,11 +46,13 @@ describe('Testing of users api', () => {
     const response = await request(app)
       .post('/api/user/login')
       .send({
-        username: 'sidg5678d',
-        password: 'skjdkjds',
-      })
-      .expect(200);
+        username: "sidg5678d1@gmail.com",
+        password: "skjdkjds",
+      });
+    console.log(response.status);
+    expect(response.status).toBe(200);  
     token = response.body.token;
+    console.log(token);
   });
   // test('logout api', async(): Promise<void> => {
   //     const response = await request(app)

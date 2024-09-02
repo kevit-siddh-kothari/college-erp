@@ -4,6 +4,7 @@ import { Department } from '../department/department.module';
 import { Attendance } from '../attendance/attendance.module';
 import { Batch, IBatch } from '../batch/batch.module';
 import {logger} from '../../utils/winstone.logger';
+import {studentDal} from './student.DAL';
 
 class StudentController {
   /**
@@ -65,12 +66,8 @@ class StudentController {
         batch: req.body.batch,
         currentsem: req.body.currentsem,
       });
-      await student.save();
-      await Batch.updateOne(
-        { '_id': req.body.batch, 'branches.departmentId': departmenId._id },
-        { $inc: { 'branches.$.availableSeats': -1, 'branches.$.occupiedSeats': 1 } },
-      );
-
+      await studentDal.saveStudent(student);
+      await studentDal.UpdateBatchOnStudentAdd(req.body.batch, departmenId._id);
       res.status(201).json({message:`student created sucessfully with default present attendance`});
     } catch (error: any) {
       logger.error(error.any);
@@ -97,7 +94,7 @@ class StudentController {
       for (let a in body) {
         student[a] = body[a];
       }
-      await student.save();
+      await studentDal.saveStudent(student);
       res.status(200).json({message:'student Updated sucessfully'});
     } catch (error: any) {
       logger.error(error.message);
@@ -116,17 +113,12 @@ class StudentController {
     // Your implementation here
     try {
       const { id } = req.params;
-      const exists: IStudent | null = await Student.findOne({ _id: id });
+      const exists: IStudent | null = await studentDal.StudentFindOne(id);
       if (!exists) {
         logger.error(`no student esixts with this id ${id}`);
         return res.status(404).json({error:`no student esixts with this id ${id}`});
       }
-      await Batch.updateOne(
-        { '_id': exists.batch, 'branches.departmentId': exists.department },
-        { $inc: { 'branches.$.availableSeats': 1, 'branches.$.occupiedSeats': -1 } },
-      );
-      await Student.deleteOne({ _id: exists._id });
-      await Attendance.deleteMany({ student: exists._id });
+      await studentDal.BatchUpdateForDelete(exists)
       res.json({error: `student deleted sucessfully!`});
     } catch (error: any) {
       logger.error(error.message);
@@ -143,25 +135,12 @@ class StudentController {
    */
   async deleteAllStudents(req: Request, res: Response): Promise<any> {
     try {
-      const TotalStudentCounnt = await Student.aggregate([
-        {
-          $group: {
-            _id: {
-              batch: "$batch",
-              department: "$department"
-            },
-            count: { $sum: 1 }
-          }
-        }
-      ])
+      const TotalStudentCounnt: any = studentDal.getTotalStudentByBatchAndDepartment();
       for(let student = 0; student<TotalStudentCounnt.length; student++){
-        await Batch.updateOne(
-          { '_id': TotalStudentCounnt[student]._id.batch, 'branches.departmentId': TotalStudentCounnt[student]._id.department },
-          { $inc: { 'branches.$.availableSeats': 1, 'branches.$.occupiedSeats': -1 } },
-        );
+        await studentDal.BatchUpdateForDelete(TotalStudentCounnt[student]);
       }
-      await Student.deleteMany({});
-      await Attendance.deleteMany({});
+     await studentDal.DeleteAllStudent();
+     await studentDal.DeleteAllAttendance();
       res.status(200).json({message:`All students data is cleared`});
     } catch (error: any) {
       res.status(400).send(error.message);
@@ -232,33 +211,10 @@ class StudentController {
   async presentLessThan75(req: Request, res: Response): Promise<any> {
    try{
     const { branch, batch, currentsem } = req.query;
-    const attendance = await Attendance.aggregate([
-      // Stage 1: Lookup to populate student details
-      {
-        $lookup: {
-          from: 'students', // The collection to join with
-          localField: 'student', // The field from the input documents
-          foreignField: '_id', // The field from the student collection
-          as: 'studentInfo', // Name of the new array field to add
-        },
-      },
-      // Stage 2: Unwind the studentInfo array to get student details in each document
-      {
-        $unwind: '$studentInfo',
-      },
-      // Stage 3: Group by student and calculate total presence
-      {
-        $group: {
-          _id: '$studentInfo', // Group by studentInfo after population
-          TotalPresent: {
-            $sum: { $cond: { if: { $eq: ['$isPresent', true] }, then: 1, else: 0 } },
-          },
-        },
-      },
-    ]);
+    const attendance: any = await studentDal.GetTotalStudentsPresent();
     let branchId: unknown;
     if (branch) {
-      const department = await Department.findOne({ _id: branch }, { _id: 1 }).lean();
+      const department: any = await studentDal.FindDepartmentById(branch);
       if (!department) {
         logger.error(`Branch '${branch}' not found.`);
         res.status(404).json({ error: `Branch '${branch}' not found.` });
@@ -269,7 +225,7 @@ class StudentController {
     }
 
     const data: {}[] = [];
-    const filteredStudents = attendance.filter((record: any) => {
+    const filteredStudents = await attendance.filter((record: any) => {
       if (record.TotalPresent < 23) {
         const student = record._id;
 
@@ -288,73 +244,7 @@ class StudentController {
 
   public async getAnalyticsData(req: Request, res: Response) {
     try{
-    const analyticsData = await Student.aggregate([
-      // Stage 1: Lookup to populate department details
-      {
-        $lookup: {
-          from: 'departments', // The collection to join with
-          localField: 'department', // Field from the input documents
-          foreignField: '_id', // Field from the documents of the "departments" collection
-          as: 'departmentInfo', // Name of the new array field to add
-        },
-      },
-      // Stage 2: Unwind the departmentInfo array to get department details in each document
-      {
-        $unwind: {
-          path: '$departmentInfo',
-          preserveNullAndEmptyArrays: false,
-        },
-      },
-      // Stage 3: Group by year and department to count total students per branch
-      {
-        $group: {
-          _id: {
-            year: '$batch',
-            branch: '$departmentInfo.departmentname', // Adjust this field based on department structure
-          },
-          totalStudents: { $sum: 1 },
-        },
-      },
-      // Stage 4: Group by year and aggregate branch counts
-      {
-        $group: {
-          _id: '$_id.year',
-          totalStudents: { $sum: '$totalStudents' },
-          branches: {
-            $push: {
-              k: '$_id.branch',
-              v: '$totalStudents',
-            },
-          },
-        },
-      },
-      // Stage 5: Convert branch array to an object
-      {
-        $project: {
-          _id: 0,
-          year: '$_id',
-          totalStudents: 1,
-          branches: {
-            $arrayToObject: {
-              $map: {
-                input: '$branches',
-                as: 'branch',
-                in: {
-                  k: '$$branch.k',
-                  v: '$$branch.v',
-                },
-              },
-            },
-          },
-        },
-      },
-      // Stage 6: Sort by year (optional)
-      {
-        $sort: {
-          year: 1,
-        },
-      },
-    ]);
+    const analyticsData = await studentDal.getAnalyticsData();
     res.status(200).json(analyticsData);
     }catch(error: any){
       logger.error(error.message);
@@ -365,7 +255,7 @@ class StudentController {
   public async getVacantSeats(req: Request, res: Response): Promise<any> {
     try {
       const { batch, branch } = req.query;
-      const departmentId: any = await Department.findOne({ departmentname: branch }, { _id: 1 });
+      const departmentId: any = await studentDal.DepartmentFind(branch);
 
       let arr: {}[] = [];
       let query: any = {};
@@ -382,7 +272,7 @@ class StudentController {
       for (let batch = 0; batch < batchData.length; batch++) {
         let batchobj: any = {};
         batchobj.year = batchData[batch].year;
-        batchobj.totalStudents = await Student.find().countDocuments();
+        batchobj.totalStudents = await studentDal.StudentCount();
         let intake: number = 0;
         let avaibaility: number = 0;
         for (let a of batchData[batch].branches) {
